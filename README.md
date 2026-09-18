@@ -7,6 +7,9 @@ panel, Xenium 5k, StrataMap - 6 technologies, 8 cell-level samples, all annotate
 or institution: raw data comes from public download links or a documented manual step (see
 `00_download_raw_data.md`), and every other path is an environment variable you set (see `code/lib.sh`).
 
+**[Read the full analysis report](04_analysis_report.md)** - narrates all 8 figures in order, with
+the exact code to reproduce each one.
+
 ## The 8 figures
 
 1. One spatial scatter per sample, colored by cell type
@@ -33,11 +36,13 @@ Exact output filenames and reproduction commands for each are in `04_analysis_re
   annotation -> gene-set embeddings -> spatial metadata -> spillover -> composition/sensitivity/ARI
   summaries.
 - **`03_generate_figures.sh`** - the 8 exact plotting commands, run after `02_preprocess.sh`.
-- **`04_analysis_report.Rmd`** - knit this for a narrated walkthrough of the analysis and all 8
-  figures in order, with the exact code to reproduce each one. Degrades gracefully: shows the real
-  rendered PNG if `03_generate_figures.sh` has run, otherwise rebuilds a plain version from whatever
-  CSVs `02_preprocess.sh` has already produced (figure 2's UMAPs are the one exception - no CSV
-  fallback is possible, see the note in that section).
+- **`04_analysis_report.Rmd`** - source for the report; **`04_analysis_report.md`** is the rendered,
+  GitHub-browsable version (images in `report_figures/`), **`04_analysis_report.html`** a
+  self-contained standalone version (same content, everything embedded in one file). Re-knit either
+  with `rmarkdown::render("04_analysis_report.Rmd", output_format = "github_document")` or
+  `"html_document"`. Degrades gracefully: shows the real rendered PNG if `03_generate_figures.sh`
+  has run, otherwise rebuilds a plain version from whatever CSVs `02_preprocess.sh` has already
+  produced (figure 2's UMAPs are the one exception - no CSV fallback is possible for those).
 - **`code/R/`, `code/python/`** - every script the two orchestration scripts above call.
 - **`reference/`** - small, non-sensitive lookup tables the pipeline needs: gene panel lists per
   technology, a gene biotype (protein-coding/lncRNA/etc.) table, the shared cell-type color

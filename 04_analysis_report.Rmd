@@ -2,6 +2,9 @@
 title: "Spatial Transcriptomics Technology Comparison"
 author: "Mariia Bilous"
 output:
+  github_document:
+    toc: true
+    html_preview: false
   html_document:
     toc: true
     toc_float: true
@@ -34,7 +37,17 @@ FIG_DIR <- file.path(REPRO_RESULTS, "figures")
 # 03_generate_figures.sh to run - it degrades gracefully to "what data exists right now."
 show_or_rebuild <- function(png_path, csv_paths, rebuild_fn) {
   if (file.exists(png_path)) {
-    knitr::include_graphics(png_path)
+    if (isTRUE(knitr::pandoc_to("gfm"))) {
+      # github_document needs a repo-relative image path it can commit alongside the .md -
+      # REPRO_RESULTS commonly lives outside this repo (e.g. cluster scratch storage), so copy the
+      # real rendered figure into report_figures/ instead of embedding that external path verbatim.
+      local_dir <- file.path(REPRO_ROOT, "report_figures")
+      dir.create(local_dir, showWarnings = FALSE)
+      file.copy(png_path, file.path(local_dir, basename(png_path)), overwrite = TRUE)
+      knitr::include_graphics(file.path("report_figures", basename(png_path)))
+    } else {
+      knitr::include_graphics(png_path)
+    }
   } else if (length(csv_paths) > 0 && all(file.exists(csv_paths))) {
     cat("_(Rendered PNG not found - rebuilding a plain version from its underlying CSV(s).)_\n\n")
     print(rebuild_fn())
