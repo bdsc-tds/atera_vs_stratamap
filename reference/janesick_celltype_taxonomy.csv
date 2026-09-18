@@ -1,0 +1,20 @@
+annotation,Level1,Level2
+Stromal,Stromal / vascular,Fibroblast
+Macrophages 1,Immune,Myeloid
+Perivascular-Like,Stromal / vascular,Endothelial / pericyte
+Myoepi ACTA2+,Epithelial,Myoepithelial
+CD4+ T Cells,Immune,T cells
+DCIS 1,Epithelial,Pre-invasive
+Prolif Invasive Tumor,Epithelial,Tumor
+Invasive Tumor,Epithelial,Tumor
+CD8+ T Cells,Immune,T cells
+Endothelial,Stromal / vascular,Endothelial / pericyte
+Macrophages 2,Immune,Myeloid
+DCIS 2,Epithelial,Pre-invasive
+B Cells,Immune,B cells
+Stromal & T Cell Hybrid,Hybrid / ambiguous,Hybrid
+T Cell & Tumor Hybrid,Hybrid / ambiguous,Hybrid
+IRF7+ DCs,Immune,Myeloid
+Mast Cells,Immune,Myeloid
+LAMP3+ DCs,Immune,Myeloid
+Myoepi KRT15+,Epithelial,Myoepithelial

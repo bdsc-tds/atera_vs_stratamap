@@ -1,0 +1,22 @@
+# Raw/processed data and results - large, and not meant to be committed. REPRO_DATA/REPRO_RESULTS
+# default here (see code/lib.sh) if you run the pipeline inside a clone of this repo.
+/data/
+/results/
+
+# R Markdown / knitr intermediates for 04_analysis_report.Rmd - only the final .html is committed.
+04_analysis_report_files/
+*.knit.md
+*.utf8.md
+
+# RStudio / R session artifacts
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# Python
+__pycache__/
+*.pyc
+
+# OS cruft
+.DS_Store

@@ -1,0 +1,42 @@
+# Conda environment covering both the R and Python sides of this pipeline. Create with:
+#   conda env create -f environment.yml
+#   conda activate spatial-tech-comparison
+# GPU is optional for rctd-py (falls back to CPU automatically) - see its README if you want CUDA:
+# https://github.com/p-gueguen/rctd-py
+name: spatial-tech-comparison
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base>=4.3
+  - r-seurat>=5.0
+  - r-arrow
+  - r-dplyr
+  - r-tidyr
+  - r-optparse
+  - r-mclust
+  - r-ggplot2
+  - r-patchwork
+  - r-ggridges
+  - r-scales
+  - r-matrix
+  - r-dbscan
+  - r-rhdf5
+  - bioconductor-dropletutils
+  - r-devtools          # for installing spacexr/SPLIT from GitHub, see README.md
+  - r-rmarkdown         # for knitting 04_analysis_report.Rmd
+  - r-knitr             # for knitting 04_analysis_report.Rmd
+  - python>=3.10
+  - pip
+  - pip:
+      - rctd-py             # GPU-accelerated RCTD - https://github.com/p-gueguen/rctd-py
+      - scanpy
+      - anndata
+      - h5py
+      - numpy
+      - pandas
+      - pyarrow
+      - scipy
+      - zarr
+      - pillow              # StrataMap segmentation-polygon rasterization
+      - openpyxl            # reading the Zenodo cell-type-annotation .xlsx

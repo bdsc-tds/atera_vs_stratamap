@@ -1,0 +1,354 @@
+---
+title: "Spatial Transcriptomics Technology Comparison"
+author: "Mariia Bilous"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center")
+
+# Same 3 environment variables every script in this package uses (see README.md). Knitting from
+# RStudio's "Knit" button sets the working directory to this file's own directory, so the defaults
+# below match code/lib.sh's own defaults (REPRO_ROOT = this directory) without needing to export
+# anything first - but if you generated results with REPRO_DATA/REPRO_RESULTS pointing elsewhere,
+# export them before knitting (or edit the three lines below) so this report finds them.
+REPRO_ROOT <- Sys.getenv("REPRO_ROOT", unset = ".")
+REPRO_DATA <- Sys.getenv("REPRO_DATA", unset = file.path(REPRO_ROOT, "data"))
+REPRO_RESULTS <- Sys.getenv("REPRO_RESULTS", unset = file.path(REPRO_ROOT, "results"))
+Sys.setenv(REPRO_ROOT = REPRO_ROOT, REPRO_DATA = REPRO_DATA, REPRO_RESULTS = REPRO_RESULTS)
+
+source(file.path(REPRO_ROOT, "code/R/plot_common.R"))
+suppressPackageStartupMessages(library(patchwork))
+
+FIG_DIR <- file.path(REPRO_RESULTS, "figures")
+
+# Every figure section below calls this once: show the real rendered PNG if 03_generate_figures.sh
+# has already produced it (best fidelity - exact styling/dimensions); otherwise, if the lighter-
+# weight CSV(s) behind it already exist (produced by 02_preprocess.sh, well before the plotting
+# step), rebuild a faithful-but-unstyled version of the same plot on the fly; otherwise say so.
+# This means this report can be knit at any point after 02_preprocess.sh, without waiting for
+# 03_generate_figures.sh to run - it degrades gracefully to "what data exists right now."
+show_or_rebuild <- function(png_path, csv_paths, rebuild_fn) {
+  if (file.exists(png_path)) {
+    knitr::include_graphics(png_path)
+  } else if (length(csv_paths) > 0 && all(file.exists(csv_paths))) {
+    cat("_(Rendered PNG not found - rebuilding a plain version from its underlying CSV(s).)_\n\n")
+    print(rebuild_fn())
+  } else if (length(csv_paths) == 0) {
+    cat("_Not yet generated, and no CSV fallback is possible for this figure (see note below) -",
+        "run the commands above first._\n")
+  } else {
+    missing <- csv_paths[!file.exists(csv_paths)]
+    cat("_Not yet generated - missing:_\n\n", paste0("- `", missing, "`\n", collapse = ""), "\n",
+        "_Run the commands above first._\n")
+  }
+}
+```
+
+## Overview
+
+Reproduces the 8 figures from ["Reproducing the Atera vs Stratamap analysis"](https://lnkd.in/p/gHZ84RsX):
+6 spatial transcriptomics technologies (**Atera**, **VisiumHD**, **Xenium MM/biomarkers**, **Xenium
+v1/breast+100**, **Xenium 5k**, **StrataMap**) on the same breast cancer tissue block, all annotated
+against the same 10x Chromium Flex scRNA-seq reference via RCTD (doublet mode, class-aware, Level2).
+
+### Pipeline
+
+1. **`00_download_raw_data.md`** - get the raw data.
+2. **`02_preprocess.sh`** - raw data -> every intermediate artifact (QC, RCTD, embeddings, spatial
+   metadata, spillover, composition/ARI/sensitivity summaries).
+3. **`03_generate_figures.sh`** - the 8 PNGs below.
+4. **This report** - narrates them, rendering from the PNG or its underlying CSV, whichever exists.
+
+Each section names the `02_preprocess.sh` stage(s) and `03_generate_figures.sh` command for that
+figure, then renders it: the real PNG if it exists, otherwise a version rebuilt from its CSV.
+
+```{r shared-setup}
+pal <- get_celltype_palette()
+```
+
+---
+
+## Figure 1: Spatial distribution of cell types
+
+One spatial scatter plot per sample (all 8, fixed order: StrataMap grades 1-3, VisiumHD, Atera,
+Xenium 5k, Xenium MM, Xenium v1), points colored by RCTD `first_type`. This is the most direct look
+at whether each technology recovers the tissue's known spatial organization (e.g. tumor regions,
+stroma) at all, before any quantitative metric.
+
+**To reproduce:** `02_preprocess.sh` STAGE 0-3 (ingestion, QC, RCTD) then STAGE 5 (spatial metadata
+extraction) for all 8 samples, then:
+```bash
+Rscript code/R/spatial_grid.R --out-dir results/figures/spatial --format png --dpi 300 \
+  --point-size 0.3 --alpha 0.7 --panel-width 1.5 --panel-height 3 --out-name spatial_grid_all_bigdots_asp2
+```
+
+```{r fig1, fig.width=12, fig.height=3}
+csvs <- vapply(TECH_ORDER, spatial_metadata_file_for_tech, character(1))
+show_or_rebuild(
+  file.path(FIG_DIR, "spatial/spatial_grid_all_bigdots_asp2.png"),
+  csvs,
+  function() {
+    panels <- Filter(Negate(is.null), lapply(TECH_ORDER, function(t) build_spatial_plot(t, label_for_tech(t), pal)))
+    wrap_plots(panels, nrow = 1)
+  }
+)
+```
+
+---
+
+## Figure 2: Per-technology UMAP
+
+Each technology's own UMAP (its full/native gene panel - "self", not restricted to any shared gene
+list), colored by `first_type`. This shows whether cell-type structure is recoverable *in principle*
+for each technology on its own terms, independent of any cross-technology gene restriction.
+
+**To reproduce:** `02_preprocess.sh` STAGE 0-3 then STAGE 4 (gene-set embeddings, "self"/`all` set)
+for all 8 samples, then:
+```bash
+Rscript code/R/umap_by_geneset.R --out-dir results/figures/umap    # per-sample umap_self_<tech>.png
+Rscript code/R/umap_self_grid.R --out-dir results/figures/umap --out-name umap_self_grid_all
+```
+
+```{r fig2, fig.width=12, fig.height=3}
+show_or_rebuild(file.path(FIG_DIR, "umap/umap_self_grid_all.png"), character(0), NULL)
+```
+
+---
+
+## Figure 3: Cell-type composition per sample
+
+Cell-type proportions per sample, all 8 in one row, cell types ordered by their overall abundance
+summed across every sample (same order in every panel, so panel-to-panel comparison is direct).
+
+**To reproduce:** `02_preprocess.sh` STAGE 0-3, STAGE 5 (spatial metadata), and STAGE 7
+(`celltype_composition.R` - writes `composition_summary.csv`, the CSV this figure and its fallback
+both read), then:
+```bash
+Rscript code/R/composition_grid.R --summary-csv results/composition/composition_summary.csv \
+  --out-dir results/figures/composition/sorted_by_abundance
+```
+
+```{r fig3, fig.width=12, fig.height=4}
+composition_csv <- file.path(REPRO_RESULTS, "composition/composition_summary.csv")
+show_or_rebuild(
+  file.path(FIG_DIR, "composition/sorted_by_abundance/composition_grid_all_pct_linear_fixedy_tall.png"),
+  composition_csv,
+  function() {
+    combined <- read.csv(composition_csv)
+    overall_order <- combined %>% group_by(first_type) %>% summarise(total_n = sum(n)) %>%
+      arrange(desc(total_n)) %>% pull(first_type)
+    panels <- lapply(TECH_ORDER, function(t) {
+      tab <- combined %>% filter(technology == t)
+      if (nrow(tab) == 0) return(NULL)
+      build_composition_plot(tab, label_for_tech(t), overall_order, pal, show_x_labels = FALSE, y_metric = "pct", y_scale = "linear")
+    })
+    wrap_plots(Filter(Negate(is.null), panels), nrow = 1)
+  }
+)
+```
+
+---
+
+## Figure 4: Cell-type sensitivity to the nCount QC floor
+
+For every sample, what % of each cell type's cells survive as the nCount QC threshold is raised well
+above the pipeline's actual default (>=10) - up to 2000. Cell types with naturally low RNA content
+(e.g. non-secretory, quiescent) lose a disproportionate share of their cells as the floor rises; this
+figure makes that bias visible per technology.
+
+**To reproduce:** `02_preprocess.sh` STAGE 0-3 then STAGE 9 (`extract_count_distributions.R` -
+writes the per-sample count-distribution parquets AND `celltype_threshold_sensitivity.csv`), then:
+```bash
+Rscript code/R/celltype_threshold_sensitivity.R --extract-dir results/count_distributions \
+  --out-dir results/figures/threshold_sensitivity --layout row_tall
+```
+
+```{r fig4, fig.width=14, fig.height=2.5}
+threshold_csv <- file.path(FIG_DIR, "threshold_sensitivity/celltype_threshold_sensitivity.csv")
+show_or_rebuild(
+  file.path(FIG_DIR, "threshold_sensitivity/celltype_threshold_sensitivity_tall.png"),
+  threshold_csv,
+  function() {
+    combined <- read.csv(threshold_csv, stringsAsFactors = FALSE)
+    combined$label <- factor(combined$label, levels = vapply(TECH_ORDER, label_for_tech, character(1)))
+    combined$first_type <- factor(combined$first_type, levels = names(pal))
+    ggplot(combined, aes(x = threshold, y = pct_retained, color = first_type)) +
+      geom_line(linewidth = 0.6) + geom_point(size = 1) + scale_x_log10() +
+      scale_color_manual(values = pal, drop = FALSE, name = "Cell type") +
+      facet_wrap(~label, nrow = 1, scales = "free_y") +
+      labs(x = "nCount threshold", y = "% cells retained") +
+      theme_post_bar() + theme(legend.position = "none", strip.background = element_blank())
+  }
+)
+```
+
+---
+
+## Figure 5: Self vs. shared-panel-genes summary
+
+Five panels sharing one technology axis: N genes, N cells, N counts/cell, N counts/gene/cell, and
+bioconservation (ARI between k-means-on-PCA clusters and RCTD `first_type`) - each comparing a
+technology's own full panel ("self", solid) against the 353-gene panel shared across every
+whole-transcriptome technology ("shared panel genes", hatched). This is the core "how much does
+restricting everyone to the same gene axis change what you can resolve" figure.
+
+Xenium 5k and Xenium MM don't have a *native* shared-panel-genes computation (their own panels
+barely overlap the breast+100 gene list the shared axis is built from), so both reuse their own
+`panel_genes` values as a stand-in - **except** Xenium 5k's hatched bar is intentionally omitted from
+the nCount/nCount-per-nGenes/ARI panels (panels 3-5): restricting its cells to that narrow gene
+subset filters out enough of them (`--min-count-in-subset`) that per-cell stats and clustering on the
+remainder would be misleading. Xenium MM's panel (96 genes, all real signal, no filtering effect)
+doesn't have this issue and keeps all 5 panels. N genes/N cells (panels 1-2) show both technologies'
+proxy either way, since those two numbers stay honest regardless of filtering.
+
+**To reproduce:** `02_preprocess.sh` STAGE 0-4 (embeddings) then STAGE 8 (separation metric/ARI),
+STAGE 9 (count distributions), STAGE 10 (ngenes/ncells CSVs), and STAGE 11 (per-gene-set
+sensitivity), then:
+```bash
+Rscript code/R/summary_grid_shared_panel.R \
+  --ngenes-csv results/ngenes_ncells_barplot/ngenes_barplot.csv \
+  --ncells-csv results/ngenes_ncells_barplot/ncells_barplot.csv \
+  --overall-csv results/sensitivity/sensitivity_overall_all_technologies.csv \
+  --ari-csv results/separation_ari/separation_ari_comparison.csv \
+  --out-dir results/figures/summary_grid
+```
+
+```{r fig5, fig.width=11, fig.height=3.5}
+summary_csv <- file.path(FIG_DIR, "summary_grid/summary_grid_data.csv")
+show_or_rebuild(
+  file.path(FIG_DIR, "summary_grid/summary_grid_shared_panel.png"),
+  summary_csv,
+  function() {
+    d <- read.csv(summary_csv, stringsAsFactors = FALSE)
+    d$label <- factor(d$label, levels = vapply(TECH_ORDER, label_for_tech, character(1)))
+    d$gene_set <- factor(d$gene_set, levels = c("self", "shared_panel_genes"), labels = c("Self genes", "Shared panel genes"))
+    panel_labs <- c(n_genes = "N genes", n_cells = "N cells", nCount = "N counts/cell",
+                     nCount_per_nGenes = "N counts/gene/cell", ari = "Bioconservation (ARI)")
+    d$panel <- factor(panel_labs[d$panel], levels = unname(panel_labs))
+    ggplot(d, aes(x = label, y = value, fill = gene_set)) +
+      geom_col(position = position_dodge(width = 0.75), width = 0.65) +
+      facet_wrap(~panel, nrow = 1, scales = "free_x") +
+      scale_fill_manual(values = c("Self genes" = "#4C72B0", "Shared panel genes" = "#55A868"), name = NULL) +
+      coord_flip() +
+      labs(x = NULL, y = NULL) +
+      theme_post_bar() + theme(legend.position = "bottom")
+  }
+)
+```
+
+---
+
+## Figure 6: RCTD secondary-type weight distribution
+
+Per-sample distribution of RCTD's doublet-mode `weight_second_type` ("w2") - how much of each cell's
+expression the model attributes to a second, distinct cell type. Higher/wider w2 distributions
+suggest more segmentation-driven mixing of neighboring cells' transcripts, independent of any
+spatial-neighborhood test (that's figure 7). Samples ordered by increasing median score.
+
+**To reproduce:** `02_preprocess.sh` STAGE 0-3 then STAGE 6 (`spillover.R` - writes the per-cell
+spillover cache), then:
+```bash
+Rscript code/R/w2_boxplot.R --cache-root results/spillover_cache --out-dir results/figures/w2
+```
+
+```{r fig6, fig.width=6, fig.height=4}
+w2_csv <- file.path(FIG_DIR, "w2/w2_boxplot_summary.csv")
+show_or_rebuild(
+  file.path(FIG_DIR, "w2/w2_boxplot_by_score.png"),
+  w2_csv,
+  function() {
+    d <- read.csv(w2_csv, stringsAsFactors = FALSE)
+    d$tech_family <- vapply(d$technology, tech_family, character(1))
+    d$label <- factor(d$label, levels = rev(d$label[order(d$median)]))
+    ggplot(d, aes(x = label, ymin = min, lower = p25, middle = median, upper = p75, ymax = max, fill = tech_family)) +
+      geom_boxplot(stat = "identity", width = 0.6) +
+      scale_fill_manual(values = TECH_FAMILY_COLORS, name = "Technology") +
+      coord_flip() +
+      labs(x = NULL, y = "secondary type weight (w2)") +
+      theme_post_bar()
+  }
+)
+```
+
+---
+
+## Figure 7: Spatial-neighborhood spillover (cosine similarity)
+
+For every sample: cosine similarity between each cell's RCTD `weight_second_type` and its spatial
+neighbors' pooled second-type weights, with a genuine permutation test (1000 shuffles of the
+neighborhood term, one-sided p = fraction of shuffles >= observed, BH-corrected across the 8
+samples). A high, significant cosine similarity means secondary-type signal is spatially structured
+(neighbors "agree" on which second type is bleeding in) rather than random per-cell noise - evidence
+that at least part of w2 (figure 6) reflects genuine spatial mixing/segmentation spillover, not just
+per-cell annotation uncertainty.
+
+**To reproduce:** same STAGE 6 spillover cache as figure 6, then:
+```bash
+Rscript code/R/spillover_metrics.R --cache-root results/spillover_cache --out-dir results/figures/spillover
+```
+
+```{r fig7, fig.width=5, fig.height=4}
+spillover_csv <- file.path(FIG_DIR, "spillover/spillover_metrics_summary.csv")
+show_or_rebuild(
+  file.path(FIG_DIR, "spillover/spillover_cosine.png"),
+  spillover_csv,
+  function() {
+    d <- read.csv(spillover_csv, stringsAsFactors = FALSE)
+    d$tech_family <- vapply(d$technology, tech_family, character(1))
+    d$label <- factor(d$label, levels = rev(d$label[order(d$cosine)]))
+    ggplot(d, aes(x = label, y = cosine, fill = tech_family)) +
+      geom_col() +
+      scale_fill_manual(values = TECH_FAMILY_COLORS, name = "Technology") +
+      coord_flip() +
+      labs(x = NULL, y = "Cosine similarity") +
+      theme_post_bar()
+  }
+)
+```
+
+---
+
+## Figure 8: Per-gene sensitivity, own panel vs. shared gene axis
+
+One point per technology: median transcripts/cell/gene on its own full panel (y) vs. on the 353-gene
+shared panel axis (x), log-scaled, with a dashed identity line and IQR error bars in both directions.
+Points above the identity line detect more signal per gene on their own panel than on the shared
+axis; point size reflects panel size at self. This isolates whether a technology's sensitivity
+advantage (or disadvantage) is about panel size/design specifically, independent of the cell-type
+recovery metrics in the other figures.
+
+**To reproduce:** `02_preprocess.sh` STAGE 0-3, STAGE 5 (spatial metadata, needed by
+`gene_sensitivity.R`), and STAGE 12 (per-gene sensitivity + synthesis), then:
+```bash
+Rscript code/R/gene_sensitivity_scatter.R \
+  --stats-csv results/gene_sensitivity/gene_sensitivity_stats.csv --out-dir results/figures/gene_sensitivity_scatter
+```
+
+```{r fig8, fig.width=6, fig.height=6}
+scatter_csv <- file.path(FIG_DIR, "gene_sensitivity_scatter/scatter_self_vs_shared_panel_genes_transcripts_per_cell_median.csv")
+show_or_rebuild(
+  file.path(FIG_DIR, "gene_sensitivity_scatter/scatter_self_vs_shared_panel_genes_transcripts_per_cell_median_log10.png"),
+  scatter_csv,
+  function() {
+    d <- read.csv(scatter_csv, stringsAsFactors = FALSE)
+    d$short_label <- factor(d$short_label, levels = names(SAMPLE_COLORS))
+    ggplot(d, aes(x = x, y = y)) +
+      geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey50") +
+      geom_errorbar(aes(ymin = y_lo, ymax = y_hi, color = short_label), width = 0, alpha = 0.6) +
+      geom_errorbarh(aes(xmin = x_lo, xmax = x_hi, color = short_label), height = 0, alpha = 0.6) +
+      geom_point(aes(size = size, fill = short_label), shape = 21, color = "black") +
+      scale_fill_manual(values = SAMPLE_COLORS, guide = "none") +
+      scale_color_manual(values = SAMPLE_COLORS, guide = "none") +
+      scale_size_continuous(name = "Genes in self panel", trans = "log10") +
+      scale_x_log10() + scale_y_log10() +
+      labs(x = "Shared panel genes (353), median transcripts/cell/gene",
+           y = "Self-panel, median transcripts/cell/gene") +
+      theme_bw() + theme(aspect.ratio = 1, legend.position = "bottom")
+  }
+)
+```
