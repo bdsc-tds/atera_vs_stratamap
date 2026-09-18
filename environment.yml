@@ -17,7 +17,8 @@ dependencies:
   - r-mclust
   - r-ggplot2
   - r-patchwork
-  - r-ggridges
+  - r-ggsci
+  - r-uwot
   - r-scales
   - r-matrix
   - r-dbscan
@@ -29,7 +30,7 @@ dependencies:
   - python>=3.10
   - pip
   - pip:
-      - rctd-py             # GPU-accelerated RCTD - https://github.com/p-gueguen/rctd-py
+      - rctd-py             # fast python RCTD - https://github.com/p-gueguen/rctd-py
       - scanpy
       - anndata
       - h5py
