@@ -109,10 +109,9 @@ Rscript code/R/composition_grid.R --summary-csv results/composition/composition_
 
 For every sample, what % of each cell type’s cells survive as the nCount
 QC threshold is raised well above the pipeline’s actual default
-(\>=10) - up to 2000. Cell types with naturally low RNA content
-(e.g. non-secretory, quiescent) lose a disproportionate share of their
-cells as the floor rises; this figure makes that bias visible per
-technology.
+(\>=10) - up to 2000. Cell types with naturally low RNA content lose a
+disproportionate share of their cells as the floor rises; this figure
+makes that bias visible per technology.
 
 **To reproduce:** `02_preprocess.sh` STAGE 0-3 then STAGE 9
 (`extract_count_distributions.R` - writes the per-sample
@@ -139,17 +138,22 @@ genes”, hatched). This is the core “how much does restricting everyone
 to the same gene axis change what you can resolve” figure.
 
 Xenium 5k and Xenium MM don’t have a *native* shared-panel-genes
-computation (their own panels barely overlap the breast+100 gene list
-the shared axis is built from), so both reuse their own `panel_genes`
-values as a stand-in - **except** Xenium 5k’s hatched bar is
-intentionally omitted from the nCount/nCount-per-nGenes/ARI panels
-(panels 3-5): restricting its cells to that narrow gene subset filters
-out enough of them (`--min-count-in-subset`) that per-cell stats and
-clustering on the remainder would be misleading. Xenium MM’s panel (96
-genes, all real signal, no filtering effect) doesn’t have this issue and
-keeps all 5 panels. N genes/N cells (panels 1-2) show both technologies’
-proxy either way, since those two numbers stay honest regardless of
-filtering.
+computation, so their hatched bar is a proxy: their own genes
+intersected with the 380-gene breast+100 addon panel (`panel_genes`) -
+**not** their full self panel, and **not** the narrower 353-gene
+shared-panel list either (353 is itself a subset of those same 380
+genes - the ones also present in every whole-transcriptome technology -
+so this proxy is a strict subset of “self” for both, just a looser one
+than the literal 353-gene list would give). For Xenium MM this shrinks
+its 280-gene panel down to 96 genes; for Xenium 5k, its ~5,100-gene
+panel down to 241. **Except** Xenium 5k’s hatched bar is intentionally
+omitted from the nCount/nCount-per-nGenes/ARI panels (panels 3-5):
+restricting its cells to that 241-gene subset filters out enough of them
+(`--min-count-in-subset`) that per-cell stats and clustering on the
+remainder would be misleading. Xenium MM’s 96-gene subset (all real
+signal, no filtering effect) doesn’t have this issue and keeps all 5
+panels. N genes/N cells (panels 1-2) show both technologies’ proxy
+either way, since those two numbers stay honest regardless of filtering.
 
 **To reproduce:** `02_preprocess.sh` STAGE 0-4 (embeddings) then STAGE 8
 (separation metric/ARI), STAGE 9 (count distributions), STAGE 10
