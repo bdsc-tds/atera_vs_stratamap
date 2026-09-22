@@ -7,7 +7,7 @@ panel, Xenium 5k, StrataMap - 6 technologies, 8 cell-level samples, all annotate
 or institution: raw data comes from public download links or a documented manual step (see
 `00_download_raw_data.md`), and every other path is an environment variable you set (see `code/lib.sh`).
 
-**[Read the full analysis report](04_analysis_report.md)** - narrates all 8 figures in order, with
+**[Read the full analysis report](analysis_report.md)** - narrates all 8 figures in order, with
 the exact code to reproduce each one.
 
 ## The 8 figures
@@ -21,7 +21,7 @@ the exact code to reproduce each one.
 7. w2-vs-spatial-neighborhood cosine similarity, ranked
 8. Per-gene sensitivity, own panel vs. shared gene axis
 
-Exact output filenames and reproduction commands for each are in `04_analysis_report.Rmd` and
+Exact output filenames and reproduction commands for each are in `analysis_report.Rmd` and
 `03_generate_figures.sh`.
 
 ## Layout
@@ -36,10 +36,10 @@ Exact output filenames and reproduction commands for each are in `04_analysis_re
   annotation -> gene-set embeddings -> spatial metadata -> spillover -> composition/sensitivity/ARI
   summaries.
 - **`03_generate_figures.sh`** - the 8 exact plotting commands, run after `02_preprocess.sh`.
-- **`04_analysis_report.Rmd`** - source for the report; **`04_analysis_report.md`** is the rendered,
-  GitHub-browsable version (images in `report_figures/`), **`04_analysis_report.html`** a
+- **`analysis_report.Rmd`** - source for the report; **`analysis_report.md`** is the rendered,
+  GitHub-browsable version (images in `report_figures/`), **`analysis_report.html`** a
   self-contained standalone version (same content, everything embedded in one file). Re-knit either
-  with `rmarkdown::render("04_analysis_report.Rmd", output_format = "github_document")` or
+  with `rmarkdown::render("analysis_report.Rmd", output_format = "github_document")` or
   `"html_document"`. Degrades gracefully: shows the real rendered PNG if `03_generate_figures.sh`
   has run, otherwise rebuilds a plain version from whatever CSVs `02_preprocess.sh` has already
   produced (figure 2's UMAPs are the one exception - no CSV fallback is possible for those).
