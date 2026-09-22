@@ -1507,11 +1507,11 @@ Comparison</h1>
 <h2>Overview</h2>
 <p>Reproduces the 8 figures from <a href="https://lnkd.in/p/gHZ84RsX">“Reproducing the Atera vs Stratamap
 analysis”</a>: 6 spatial transcriptomics technologies
-(<strong>Atera</strong>, <strong>VisiumHD</strong>, <strong>Xenium
-MM/biomarkers</strong>, <strong>Xenium v1/breast+100</strong>,
-<strong>Xenium 5k</strong>, <strong>StrataMap</strong>) on the same
-breast cancer tissue block, all annotated against the same 10x Chromium
-Flex scRNA-seq reference via RCTD (doublet mode, class-aware,
+(<strong>StrataMap</strong>, <strong>VisiumHD</strong>,
+<strong>Atera</strong>, <strong>Xenium MM/biomarkers</strong>,
+<strong>Xenium v1/breast+100</strong>, <strong>Xenium 5k</strong>) on
+the same breast cancer tissue block, all annotated against the same 10x
+Chromium Flex scRNA-seq reference via RCTD (doublet mode, class-aware,
 Level2).</p>
 <div id="pipeline" class="section level3">
 <h3>Pipeline</h3>
@@ -1535,11 +1535,11 @@ its CSV.</p>
 </div>
 <div id="figure-1-spatial-distribution-of-cell-types" class="section level2">
 <h2>Figure 1: Spatial distribution of cell types</h2>
-<p>One spatial scatter plot per sample (all 8, fixed order: StrataMap
-grades 1-3, VisiumHD, Atera, Xenium 5k, Xenium MM, Xenium v1), points
-colored by RCTD <code>first_type</code>. This is the most direct look at
-whether each technology recovers the tissue’s known spatial organization
-(e.g. tumor regions, stroma) at all, before any quantitative metric.</p>
+<p>One spatial plot per sample (all 8, fixed order: StrataMap grades
+1-3, VisiumHD, Atera, Xenium 5k, Xenium MM, Xenium v1), points colored
+by RCTD <code>first_type</code>. This is the most direct look at whether
+each technology recovers the tissue’s spatial organization (e.g. tumor
+regions, stroma) at all, before any quantitative metric.</p>
 <p><strong>To reproduce:</strong> <code>02_preprocess.sh</code> STAGE
 0-3 (ingestion, QC, RCTD) then STAGE 5 (spatial metadata extraction) for
 all 8 samples, then:</p>
@@ -1565,9 +1565,8 @@ Rscript code/R/umap_self_grid.R --out-dir results/figures/umap --out-name umap_s
 </div>
 <div id="figure-3-cell-type-composition-per-sample" class="section level2">
 <h2>Figure 3: Cell-type composition per sample</h2>
-<p>Cell-type proportions per sample, all 8 in one row, cell types
-ordered by their overall abundance summed across every sample (same
-order in every panel, so panel-to-panel comparison is direct).</p>
+<p>Cell-type proportions per sample, cell types ordered by their overall
+abundance summed across every sample (same order in every panel).</p>
 <p><strong>To reproduce:</strong> <code>02_preprocess.sh</code> STAGE
 0-3, STAGE 5 (spatial metadata), and STAGE 7
 (<code>celltype_composition.R</code> - writes
@@ -1596,8 +1595,8 @@ the per-sample count-distribution parquets AND
 </div>
 <div id="figure-5-self-vs.-shared-panel-genes-summary" class="section level2">
 <h2>Figure 5: Self vs. shared-panel-genes summary</h2>
-<p>Five panels sharing one technology axis: N genes, N cells, N
-counts/cell, N counts/gene/cell, and bioconservation (ARI between
+<p>Five panels sharing one technology axis: N genes, N cells, N counts
+per cell, N counts/gene per cell, and bioconservation (ARI between
 k-means-on-PCA clusters and RCTD <code>first_type</code>) - each
 comparing a technology’s own full panel (“self”, solid) against the
 353-gene panel shared across every whole-transcriptome technology
@@ -1607,16 +1606,11 @@ figure.</p>
 <p>Xenium 5k and Xenium MM don’t have a <em>native</em>
 shared-panel-genes computation, so their hatched bar is a proxy: their
 own genes intersected with the 380-gene breast+100 addon panel
-(<code>panel_genes</code>) - <strong>not</strong> their full self panel,
-and <strong>not</strong> the narrower 353-gene shared-panel list either
-(353 is itself a subset of those same 380 genes - the ones also present
-in every whole-transcriptome technology - so this proxy is a strict
-subset of “self” for both, just a looser one than the literal 353-gene
-list would give). For Xenium MM this shrinks its 280-gene panel down to
-96 genes; for Xenium 5k, its ~5,100-gene panel down to 241.
-<strong>Except</strong> Xenium 5k’s hatched bar is intentionally omitted
-from the nCount/nCount-per-nGenes/ARI panels (panels 3-5): restricting
-its cells to that 241-gene subset filters out enough of them
+(<code>panel_genes</code>). For Xenium MM this shrinks its 280-gene
+panel down to 96 genes; for Xenium 5k, its ~5,100-gene panel down to
+241. <strong>Except</strong> Xenium 5k’s hatched bar is intentionally
+omitted from the nCount/nCount-per-nGenes/ARI panels (panels 3-5):
+restricting its cells to that 241-gene subset filters out enough of them
 (<code>--min-count-in-subset</code>) that per-cell stats and clustering
 on the remainder would be misleading. Xenium MM’s 96-gene subset (all
 real signal, no filtering effect) doesn’t have this issue and keeps all
@@ -1639,11 +1633,11 @@ distributions), STAGE 10 (ngenes/ncells CSVs), and STAGE 11
 <div id="figure-6-rctd-secondary-type-weight-distribution" class="section level2">
 <h2>Figure 6: RCTD secondary-type weight distribution</h2>
 <p>Per-sample distribution of RCTD’s doublet-mode
-<code>weight_second_type</code> (“w2”) - how much of each cell’s
-expression the model attributes to a second, distinct cell type.
-Higher/wider w2 distributions suggest more segmentation-driven mixing of
-neighboring cells’ transcripts, independent of any spatial-neighborhood
-test (that’s figure 7). Samples ordered by increasing median score.</p>
+<code>weight_second_type</code> (“w2”), which represents the fraction of
+each cell’s expression profile attributed to a second, distinct cell
+type. Higher w2 values indicate greater profile impurity, as a larger
+proportion of the observed expression is explained by a different cell
+type. Samples are ordered by increasing median w2.</p>
 <p><strong>To reproduce:</strong> <code>02_preprocess.sh</code> STAGE
 0-3 then STAGE 6 (<code>spillover.R</code> - writes the per-cell
 spillover cache), then:</p>
@@ -1671,14 +1665,11 @@ per-cell annotation uncertainty.</p>
 </div>
 <div id="figure-8-per-gene-sensitivity-own-panel-vs.-shared-gene-axis" class="section level2">
 <h2>Figure 8: Per-gene sensitivity, own panel vs. shared gene axis</h2>
-<p>One point per technology: median transcripts/cell/gene on its own
-full panel (y) vs. on the 353-gene shared panel axis (x), log-scaled,
-with a dashed identity line and IQR error bars in both directions.
-Points above the identity line detect more signal per gene on their own
-panel than on the shared axis; point size reflects panel size at self.
-This isolates whether a technology’s sensitivity advantage (or
-disadvantage) is about panel size/design specifically, independent of
-the cell-type recovery metrics in the other figures.</p>
+<p>One point per technology: median transcript abundance (i.e., for each
+gene, total gene counts normalized by total number of cells) on the
+technology’s own full panel (y) vs. on the 353-gene shared panel axis
+(x), log-scaled, with a dashed identity line and IQR error bars in both
+directions. Point size reflects self panel size.</p>
 <p><strong>To reproduce:</strong> <code>02_preprocess.sh</code> STAGE
 0-3, STAGE 5 (spatial metadata, needed by
 <code>gene_sensitivity.R</code>), and STAGE 12 (per-gene sensitivity +
