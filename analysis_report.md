@@ -249,13 +249,15 @@ technology’s own full panel (y) vs. on the shared-panel axis (x),
 log-scaled, with a dashed identity line and IQR error bars in both
 directions. Point size reflects self panel size.
 
-The shared-panel axis is the same literal 353-gene list for every
-technology, but not every technology’s own panel actually contains all
-353 of those genes: Atera, VisiumHD, Xenium v1, and StrataMap (all 3
-grades) do (353/353); Xenium 5k’s panel only overlaps 229 of them, and
-Xenium MM’s smaller targeted panel only 91. Those two points are still
-the correct, literal intersection with the same 353-gene list - just a
-smaller one, because their panels are smaller.
+The shared-panel axis is the literal 353-gene list for Atera, VisiumHD,
+Xenium v1, and StrataMap (all 3 grades) - all four contain the full list
+(353/353). Xenium 5k and Xenium MM don’t have a native 353-gene
+computation, so - same as Figure 5’s hatched bars - their points use a
+proxy instead: their own genes intersected with the 380-gene breast+100
+addon panel, giving 241 genes for Xenium 5k and 96 for Xenium MM. The
+x-axis label says “(353)” because that’s the list every other point
+uses; for these two, read it as “each technology’s version of the
+shared-panel axis” rather than a literal 353-gene count.
 
 **To reproduce:** `02_preprocess.sh` STAGE 0-3, STAGE 5 (spatial
 metadata, needed by `gene_sensitivity.R`), and STAGE 12 (per-gene
