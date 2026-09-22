@@ -85,6 +85,11 @@ workstation can exhaust its memory even though any one of them alone is fine.
 
 ## Notes / scope
 
+- **A few minor bugs were fixed while building this package, relative to the originally posted
+  results** (e.g. a self-referential file glob that duplicated rows on reruns, an inconsistent
+  cell-inclusion threshold across figure 5's panels, a mismatched gene-count label on figure 8).
+  None of them changes any result or conclusion - they just made the analysis more internally
+  consistent. See the git history for the specifics.
 - **StrataMap's fresh-frozen vs. everyone-else's FFPE tissue prep is a real confound baked into
   every one of these 8 figures**
 - **RCTD** runs via `rctd-py` (https://github.com/p-gueguen/rctd-py), a public GPU-accelerated
