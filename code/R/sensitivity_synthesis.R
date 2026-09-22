@@ -13,7 +13,12 @@ option_list <- list(
 opt <- parse_args(OptionParser(option_list = option_list))
 dir.create(opt$`out-dir`, recursive = TRUE, showWarnings = FALSE)
 
+# This script's own output (sensitivity_overall_all_technologies.csv) matches its own input glob -
+# if --out-dir is the same as (or nested under) --sensitivity-dir, a rerun would read its own prior
+# output back in as an extra "technology" and re-duplicate every row. Exclude it explicitly rather
+# than relying on --out-dir being some other directory.
 overall_files <- list.files(opt$`sensitivity-dir`, pattern = "^sensitivity_overall_.*\\.csv$", recursive = TRUE, full.names = TRUE)
+overall_files <- overall_files[basename(overall_files) != "sensitivity_overall_all_technologies.csv"]
 cat("Found", length(overall_files), "overall files\n")
 
 overall_all <- do.call(rbind, lapply(overall_files, read.csv))
