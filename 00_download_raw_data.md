@@ -37,13 +37,21 @@ was derived.
 ## 3. Xenium targeted - Biomarkers panel ("Xenium MM")
 
 - Dataset page: https://www.10xgenomics.com/datasets/xenium-ffpe-human-breast-biomarkers
-- Download the Xenium Output Bundle.
+- **This page has 12 breast sections - download the specific one this pipeline uses, region
+  `S1_Bot` ("S1-Bottom"), run name "Human Breast Cancer 280g Biomarkers + HK Genes S1 Bot".** Verify
+  you have the right bundle by checking `outs/experiment.xenium`'s `region_name` field after
+  downloading - it should read `"S1_Bot"`.
+- Download the Xenium Output Bundle for that region.
 - Save/unzip to: `$REPRO_DATA/raw/xenium_biomarkers/outs/`
 
 ## 4. Xenium targeted - Breast + 100 addon panel ("Xenium v1")
 
 - Dataset page: https://www.10xgenomics.com/datasets/xenium-ffpe-human-breast-with-custom-add-on-panel-1-standard
-- Download the Xenium Output Bundle.
+- **This page has multiple samples - download the specific one this pipeline uses**: region
+  `Xenium_V1_FFPE_Human_Breast_IDC_With_Addon`, slide `0002807`, cassette `SIM2`. Verify with
+  `outs/experiment.xenium`'s `region_name` field after downloading - it should read
+  `"Xenium_V1_FFPE_Human_Breast_IDC_With_Addon"`.
+- Download the Xenium Output Bundle for that sample.
 - Save/unzip to: `$REPRO_DATA/raw/xenium_breast100/outs/`
 
 ## 5. Xenium Prime 5K ("Xenium 5k"), FFPE human breast cancer
