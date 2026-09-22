@@ -3,7 +3,7 @@
 # used internally - same logic, no plots). Builds a Seurat object from
 # code/python/aggregate_stratamap_barcodes_to_cells.py's output, applies the same QC thresholds
 # used for every other technology in this comparison (nCount >= 10, gene detected in >= 10 cells),
-# and saves the QCed object as .rds + 10x-style .h5 + .parquet.
+# and saves the QCed object as .rds + 10x-style .h5.
 #
 # Usage: Rscript qc_seurat_stratamap.R --sample-name DCIS_IDC_Grade1-77125049 \
 #   --aggregated-dir <cell-level raw_aggregated dir> --out-dir <dir> \
@@ -64,7 +64,6 @@ obj[["spatial"]] <- CreateDimReducObject(sp_coords, assay = assay_name, key = "S
 dir.create(opt$`out-dir`, recursive = TRUE, showWarnings = FALSE)
 seurat_path <- file.path(opt$`out-dir`, paste0(opt$`sample-name`, "_qc_seurat.rds"))
 h5_path <- file.path(opt$`out-dir`, paste0(opt$`sample-name`, "_qc_counts.h5"))
-meta_path <- file.path(opt$`out-dir`, paste0(opt$`sample-name`, "_qc_metadata.parquet"))
 
 saveRDS(obj, file = seurat_path)
 DropletUtils::write10xCounts(
@@ -75,6 +74,5 @@ DropletUtils::write10xCounts(
   type = "HDF5",
   overwrite = TRUE
 )
-write_parquet(obj@meta.data, meta_path)
 
-cat("Saved:\n", seurat_path, "\n", h5_path, "\n", meta_path, "\n")
+cat("Saved:\n", seurat_path, "\n", h5_path, "\n")

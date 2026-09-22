@@ -137,28 +137,6 @@ get_celltype_palette <- function() {
   build_celltype_palette()
 }
 
-# Gene panel membership, for the gene mean/var plot. Priority when a gene is in multiple panels:
-# Biomarkers (Xenium MM) > Breast+100 (Xenium v1) > Xenium 5k > Atera > none.
-GENE_PANEL_LEVELS <- c("Xenium MM", "Xenium v1", "Xenium 5k", "ATERA", "none")
-GENE_PANEL_COLORS <- c(
-  "Xenium MM" = "#E64B35", "Xenium v1" = "#4DBBD5",
-  "Xenium 5k" = "#00A087", "ATERA" = "#F39B7F", "none" = "black"
-)
-
-classify_gene_panel <- function(gene_symbols) {
-  biomarkers <- read.csv(file.path(REFERENCE_DIR, "biomarkers_gene_list.csv"))$gene_symbol
-  breast100 <- read.csv(file.path(REFERENCE_DIR, "breast100_gene_list.csv"))$gene_symbol
-  xenium5k <- read.csv(file.path(REFERENCE_DIR, "xenium5k_gene_list.csv"))$gene_symbol
-  atera <- read.csv(file.path(REFERENCE_DIR, "atera_gene_list.csv"))$gene_symbol
-
-  category <- rep("none", length(gene_symbols))
-  category[gene_symbols %in% atera] <- "ATERA"
-  category[gene_symbols %in% xenium5k] <- "Xenium 5k"
-  category[gene_symbols %in% breast100] <- "Xenium v1"
-  category[gene_symbols %in% biomarkers] <- "Xenium MM"
-  factor(category, levels = GENE_PANEL_LEVELS)
-}
-
 # Scale bar for spatial plots (theme_void strips axes). Assumes the caller draws y with
 # scale_y_reverse() - the bar is placed near max(y) so it lands at the visual BOTTOM after reversal.
 nice_scale_length <- function(span) {
@@ -225,7 +203,6 @@ spatial_metadata_file_for_tech <- function(technology) {
 
 # atera/xenium_biomarkers ship with x/y_centroid transposed relative to the other 6 samples.
 SPATIAL_FLIP_XY <- c("atera", "xenium_biomarkers")
-SPATIAL_POINT_SIZE_OVERRIDE <- c(visiumhd = 0.15)
 
 build_spatial_plot <- function(tech, label, pal, point_size = 0.08, alpha = 0.6) {
   f <- spatial_metadata_file_for_tech(tech)
@@ -276,15 +253,7 @@ save_post <- function(path, plot, kind) {
 # duplicated per script the way the internal lab version did.
 gene_list_for_set <- function(set_name, all_genes) {
   if (set_name == "all") return(all_genes)
-  if (set_name %in% c("informative", "lncrna")) {
-    biotypes <- arrow::read_parquet(file.path(REFERENCE_DIR, "gene_biotypes.parquet"))
-    symbols <- if (set_name == "informative") biotypes$gene_symbol[biotypes$is_informative]
-               else biotypes$gene_symbol[biotypes$biotype == "lncRNA"]
-    return(intersect(all_genes, symbols))
-  }
-  path_for <- c(atera_genes = "atera_gene_list.csv", panel_genes = "breast100_gene_list.csv",
-                xenium_5k_genes = "xenium5k_gene_list.csv", visiumhd_genes = "visiumhd_gene_list.csv",
-                shared_panel_genes = "shared_panel_gene_list.csv")
+  path_for <- c(panel_genes = "breast100_gene_list.csv", shared_panel_genes = "shared_panel_gene_list.csv")
   if (set_name %in% names(path_for)) {
     genes <- read.csv(file.path(REFERENCE_DIR, path_for[[set_name]]))$gene_symbol
     return(intersect(all_genes, genes))

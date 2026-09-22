@@ -6,14 +6,9 @@
 # Gene sets (see plot_common.R's gene_list_for_set(); which ones apply to a given technology is
 # decided by the CALLING script, not hardcoded here):
 #   all                - every gene in the QCed object
-#   informative        - protein_coding+lncRNA (reference/gene_biotypes.parquet), intersected with the object
-#   atera_genes        - intersect with reference/atera_gene_list.csv (Atera's own gene panel)
 #   panel_genes        - intersect with reference/breast100_gene_list.csv (breast+100 addon panel)
-#   xenium_5k_genes    - intersect with reference/xenium5k_gene_list.csv
-#   visiumhd_genes     - intersect with reference/visiumhd_gene_list.csv
 #   shared_panel_genes - intersect with reference/shared_panel_gene_list.csv (single literal gene
 #                        list shared across every whole-transcriptome technology's QCed data)
-#   lncrna             - biotype=="lncRNA" only
 # A gene set is skipped (with a loud log line, not silently) if the intersection has too few genes
 # to be meaningful (--min-genes, default 200).
 #
@@ -25,7 +20,7 @@
 # --label-suffix (e.g. "_filtered") saves it alongside the original instead of overwriting it.
 #
 # Usage: Rscript gene_set_embeddings.R --technology atera --sample breast_cancer \
-#   --qc-rds <path>_qc_seurat.rds --gene-sets all,informative,atera_genes,panel_genes \
+#   --qc-rds <path>_qc_seurat.rds --gene-sets all,panel_genes \
 #   --out-dir <dir> [--rctd-dir <spot_results.parquet dir>]
 #   [--min-count-in-subset 20 --npcs 15 --label-suffix _filtered] [--umap-init random]
 
@@ -41,7 +36,7 @@ option_list <- list(
   make_option("--technology", type = "character"),
   make_option("--sample", type = "character"),
   make_option("--qc-rds", type = "character"),
-  make_option("--gene-sets", type = "character", default = "all,informative,atera_genes,panel_genes"),
+  make_option("--gene-sets", type = "character", default = "all,panel_genes"),
   make_option("--rctd-dir", type = "character", default = NA),
   make_option("--out-dir", type = "character"),
   make_option("--min-count-in-subset", type = "integer", default = 0),

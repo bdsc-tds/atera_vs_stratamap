@@ -302,12 +302,18 @@ wait_all
 
 # ============================================================ STAGE 11: per-gene-set sensitivity.
 # Feeds fig 5's --overall-csv.
-echo "=== STAGE 11: sensitivity by gene set / cell type ==="
+echo "=== STAGE 11: sensitivity by gene set ==="
+# Exactly the gene sets figure 5 (summary_grid_shared_panel.R) reads for each technology: everyone
+# needs "all" (self); atera/xenium_breast100/visiumhd/stratamap x3 have a real shared_panel_genes
+# axis; xenium_biomarkers instead needs its own panel_genes (used as its shared-panel proxy);
+# xenium_5k needs neither proxy (dropped from panels 3-5 - see summary_grid_shared_panel.R's header).
+declare -A SENS_GENESETS=( [atera]=all,shared_panel_genes [xenium_breast100]=all,shared_panel_genes \
+  [visiumhd]=all,shared_panel_genes [xenium_biomarkers]=all,panel_genes [xenium_5k]=all )
 declare -A SENS_MEM=( [atera]=64G [xenium_biomarkers]=64G [xenium_breast100]=64G [xenium_5k]=64G [visiumhd]=64G )
 for TECH in "${TECHS[@]}"; do
   dispatch "sensitivity_$TECH" "${SENS_MEM[$TECH]}" 01:30:00 4 \
     "$R_CMD $CODE_R/sensitivity_by_geneset_celltype.R --technology $TECH --sample breast_cancer \
-      --qc-rds $(qc_rds_for $TECH) --rctd-dir $(rctd_dir_for $TECH) --gene-sets all,atera_genes,panel_genes \
+      --qc-rds $(qc_rds_for $TECH) --gene-sets ${SENS_GENESETS[$TECH]} \
       --out-dir $REPRO_RESULTS/sensitivity/$TECH"
 done
 declare -A SM_SENS_MEM=( [Grade1]=64G [Grade2]=96G [Grade3]=150G )
@@ -315,18 +321,7 @@ for GRADE in Grade1 Grade2 Grade3; do
   TECH="stratamap_ill_5um_$GRADE"
   dispatch "sensitivity_sm_$GRADE" "${SM_SENS_MEM[$GRADE]}" 02:00:00 4 \
     "$R_CMD $CODE_R/sensitivity_by_geneset_celltype.R --technology $TECH --sample $GRADE \
-      --qc-rds $(qc_rds_for $TECH) --rctd-dir $(rctd_dir_for $TECH) --gene-sets all,atera_genes,panel_genes \
-      --out-dir $REPRO_RESULTS/sensitivity/$TECH"
-done
-wait_all
-# shared_panel_genes backfill - same 6-sample scope as STAGE 4c, appended (14's script re-derives
-# every requested --gene-sets each run, so pass the full list again rather than just the new one).
-for TECH in atera xenium_breast100 visiumhd stratamap_ill_5um_Grade1 stratamap_ill_5um_Grade2 stratamap_ill_5um_Grade3; do
-  SAMPLE=breast_cancer; [[ $TECH == stratamap_* ]] && SAMPLE=${TECH##*_}
-  MEM=64G; [[ $TECH == stratamap_*Grade2 ]] && MEM=96G; [[ $TECH == stratamap_*Grade3 ]] && MEM=150G
-  dispatch "sensitivity_shared_$TECH" "$MEM" 01:30:00 4 \
-    "$R_CMD $CODE_R/sensitivity_by_geneset_celltype.R --technology $TECH --sample $SAMPLE \
-      --qc-rds $(qc_rds_for $TECH) --rctd-dir $(rctd_dir_for $TECH) --gene-sets all,atera_genes,panel_genes,shared_panel_genes \
+      --qc-rds $(qc_rds_for $TECH) --gene-sets all,shared_panel_genes \
       --out-dir $REPRO_RESULTS/sensitivity/$TECH"
 done
 wait_all

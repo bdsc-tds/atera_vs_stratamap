@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # Cell-level QC for any Xenium-family technology (Atera, Xenium targeted biomarkers, Xenium
 # breast+100, Xenium 5k) or VisiumHD: nCount >= 10, gene detected in >= 10 cells, saved as an
-# .rds/.h5/.parquet trio.
+# .rds + .h5 pair.
 #
 # Two input shapes handled (see --input-type):
 #   h5     - native 10x cell_feature_matrix.h5 + cells.parquet (or VisiumHD's equivalent)
@@ -101,11 +101,10 @@ sp_coords <- as.matrix(obj@meta.data %>% select(x_centroid, y_centroid))
 colnames(sp_coords) <- c("ST_1", "ST_2")
 obj[["spatial"]] <- CreateDimReducObject(sp_coords, assay = assay_name, key = "ST_")
 
-# --- Save (.rds/.h5/.parquet trio) ---
+# --- Save (.rds + .h5) ---
 dir.create(opt$`out-dir`, recursive = TRUE, showWarnings = FALSE)
 seurat_path <- file.path(opt$`out-dir`, paste0(opt$sample, "_qc_seurat.rds"))
 h5_path <- file.path(opt$`out-dir`, paste0(opt$sample, "_qc_counts.h5"))
-meta_path <- file.path(opt$`out-dir`, paste0(opt$sample, "_qc_metadata.parquet"))
 
 saveRDS(obj, file = seurat_path)
 DropletUtils::write10xCounts(
@@ -116,6 +115,5 @@ DropletUtils::write10xCounts(
   type = "HDF5",
   overwrite = TRUE
 )
-write_parquet(obj@meta.data, meta_path)
 
-cat("Saved:\n", seurat_path, "\n", h5_path, "\n", meta_path, "\n")
+cat("Saved:\n", seurat_path, "\n", h5_path, "\n")
