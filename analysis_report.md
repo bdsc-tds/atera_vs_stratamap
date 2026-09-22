@@ -255,7 +255,7 @@ sensitivity + synthesis), then:
 
 ``` bash
 Rscript code/R/gene_sensitivity_scatter.R \
-  --stats-csv results/gene_sensitivity/gene_sensitivity_stats.csv --out-dir results/figures/gene_sensitivity_scatter
+  --stats-csv results/gene_sensitivity/csv/gene_sensitivity_stats.csv --out-dir results/figures/gene_sensitivity_scatter
 ```
 
 <img src="report_figures/scatter_self_vs_shared_panel_genes_transcripts_per_cell_median_log10.png" width="4500" style="display: block; margin: auto;" />

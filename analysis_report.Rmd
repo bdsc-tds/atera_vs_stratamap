@@ -390,7 +390,7 @@ the same 353-gene list - just a smaller one, because their panels are smaller.
 `gene_sensitivity.R`), and STAGE 12 (per-gene sensitivity + synthesis), then:
 ```bash
 Rscript code/R/gene_sensitivity_scatter.R \
-  --stats-csv results/gene_sensitivity/gene_sensitivity_stats.csv --out-dir results/figures/gene_sensitivity_scatter
+  --stats-csv results/gene_sensitivity/csv/gene_sensitivity_stats.csv --out-dir results/figures/gene_sensitivity_scatter
 ```
 
 ```{r fig8, fig.width=6, fig.height=6}
