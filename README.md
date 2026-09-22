@@ -6,7 +6,7 @@ panel, Xenium 5k, StrataMap - 6 technologies, 8 cell-level samples, all annotate
 10x Chromium Flex scRNA-seq reference). Raw data comes from public download links or a documented manual step (see
 `00_download_raw_data.md`), and every other path is an environment variable you set (see `code/lib.sh`).
 
-**[Read the full analysis report](analysis_report.md)** - narrates all 8 figures in order, with
+📊 **[Read the full analysis report](analysis_report.md)** - narrates all 8 figures in order, with
 the exact code to reproduce each one.
 
 ## The 8 figures
@@ -50,7 +50,7 @@ Exact output filenames and reproduction commands for each are in `analysis_repor
   technology, a gene biotype (protein-coding/lncRNA/etc.) table, the shared cell-type color
   palette, and the Chromium reference's cell-type taxonomy (see below).
 
-## How to run
+## 🚀 How to run
 
 ```bash
 conda env create -f environment.yml
@@ -82,7 +82,7 @@ you launched the script from. Without SLURM, `02_preprocess.sh` runs everything 
 design: several of these steps need 32-250GB of RAM, and running multiple at once on a single
 workstation can exhaust its memory even though any one of them alone is fine.
 
-## Notes / scope
+## ⚠️ Notes / scope
 
 - **A few minor bugs were fixed relative to the [originally posted results](https://lnkd.in/p/gHZ84RsX)**.
   None of them changes any conclusion - they just made the analysis more internally
