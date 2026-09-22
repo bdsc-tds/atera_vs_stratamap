@@ -59,8 +59,7 @@ was derived.
 
 ## 6. VisiumHD, 11mm human breast cancer
 
-- Dataset page (for reference/ToS): https://www.10xgenomics.com/datasets (search "Visium HD 11mm
-  Human Breast Cancer")
+- Dataset page (for reference/ToS): https://www.10xgenomics.com/datasets/visium-hd-cytassist-11mm-human-breast-cancer
 - Direct CDN base (no bot-check, reachable via `curl -I` -> HTTP 200):
   `https://cf.10xgenomics.com/samples/spatial-exp/4.1.0/Visium_HD_11mm_Human_Breast_Cancer/`
 - File actually needed by this pipeline (cell level only):
