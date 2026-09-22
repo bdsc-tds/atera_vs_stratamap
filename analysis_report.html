@@ -1510,9 +1510,12 @@ analysis”</a>: 6 spatial transcriptomics technologies
 (<strong>StrataMap</strong>, <strong>VisiumHD</strong>,
 <strong>Atera</strong>, <strong>Xenium MM/biomarkers</strong>,
 <strong>Xenium v1/breast+100</strong>, <strong>Xenium 5k</strong>) on
-the same breast cancer tissue block, all annotated against the same 10x
-Chromium Flex scRNA-seq reference via RCTD (doublet mode, class-aware,
-Level2).</p>
+breast cancer tissue - not all the same block: Atera and Xenium
+MM/biomarkers share one tissue block, but VisiumHD, Xenium
+v1/breast+100, Xenium 5k, and StrataMap (3 separate grades) are each
+their own specimen. Every cell, regardless of which block it came from,
+is annotated against the same 10x Chromium Flex scRNA-seq reference via
+RCTD (doublet mode, class-aware, Level2).</p>
 <div id="pipeline" class="section level3">
 <h3>Pipeline</h3>
 <ol style="list-style-type: decimal">
