@@ -40,9 +40,12 @@ Exact output filenames and reproduction commands for each are in `analysis_repor
   GitHub-browsable version (images in `report_figures/`), **`analysis_report.html`** a
   self-contained standalone version (same content, everything embedded in one file). Re-knit either
   with `rmarkdown::render("analysis_report.Rmd", output_format = "github_document")` or
-  `"html_document"`. Degrades gracefully: shows the real rendered PNG if `03_generate_figures.sh`
-  has run, otherwise rebuilds a plain version from whatever CSVs `02_preprocess.sh` has already
-  produced (figure 2's UMAPs are the one exception - no CSV fallback is possible for those).
+  `"html_document"`. Degrades gracefully: shows the real rendered PNG for any figure
+  `03_generate_figures.sh` has already produced, otherwise rebuilds a plain version from that
+  figure's own CSV if one exists. Figures 1 and 3 can rebuild straight from `02_preprocess.sh`'s
+  output, before `03_generate_figures.sh` ever runs; figures 4-8's fallback CSVs are written by
+  their own `03_generate_figures.sh` scripts, so those need that script to have run at least once;
+  figure 2's UMAPs have no CSV fallback at all (see the report for why).
 - **`code/R/`, `code/python/`** - every script the two orchestration scripts above call.
 - **`reference/`** - small, non-sensitive lookup tables the pipeline needs: gene panel lists per
   technology, a gene biotype (protein-coding/lncRNA/etc.) table, the shared cell-type color

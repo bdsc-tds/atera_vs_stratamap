@@ -120,8 +120,9 @@ makes that bias visible per technology.
 
 **To reproduce:** `02_preprocess.sh` STAGE 0-3 then STAGE 9
 (`extract_count_distributions.R` - writes the per-sample
-count-distribution parquets AND `celltype_threshold_sensitivity.csv`),
-then:
+count-distribution parquets this figure reads;
+`celltype_threshold_sensitivity.csv` itself is written by the plotting
+command below, not by STAGE 9), then:
 
 ``` bash
 Rscript code/R/celltype_threshold_sensitivity.R --extract-dir results/count_distributions \
