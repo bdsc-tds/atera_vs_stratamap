@@ -1517,7 +1517,12 @@ are each their own separate specimen; and StrataMap alone spans 3
 different tumor grades (DCIS/IDC Grade 1-3), each its own distinct
 sample. Every cell, regardless of which sample or disease stage it came
 from, is annotated against the same 10x Chromium Flex scRNA-seq
-reference via RCTD (doublet mode, class-aware, Level2).</p>
+reference via <a href="https://doi.org/10.1038/s41587-021-00830-w">RCTD</a> (Cable et
+al. 2022, <em>Nature Biotechnology</em> - “Robust decomposition of cell
+type mixtures in spatial transcriptomics”; doublet mode, class-aware,
+Level2), run through <a href="https://github.com/p-gueguen/rctd-py"><code>rctd-py</code></a>, a
+public GPU-accelerated PyTorch reimplementation - not the original lab’s
+private tooling.</p>
 <div id="pipeline" class="section level3">
 <h3>Pipeline</h3>
 <ol style="list-style-type: decimal">

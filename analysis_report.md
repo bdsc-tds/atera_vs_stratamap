@@ -32,8 +32,13 @@ tissue block; VisiumHD, Xenium v1/breast+100, and Xenium 5k are each
 their own separate specimen; and StrataMap alone spans 3 different tumor
 grades (DCIS/IDC Grade 1-3), each its own distinct sample. Every cell,
 regardless of which sample or disease stage it came from, is annotated
-against the same 10x Chromium Flex scRNA-seq reference via RCTD (doublet
-mode, class-aware, Level2).
+against the same 10x Chromium Flex scRNA-seq reference via
+[RCTD](https://doi.org/10.1038/s41587-021-00830-w) (Cable et al. 2022,
+*Nature Biotechnology* - “Robust decomposition of cell type mixtures in
+spatial transcriptomics”; doublet mode, class-aware, Level2), run
+through [`rctd-py`](https://github.com/p-gueguen/rctd-py), a public
+GPU-accelerated PyTorch reimplementation - not the original lab’s
+private tooling.
 
 ### Pipeline
 
