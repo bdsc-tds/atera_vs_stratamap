@@ -1,10 +1,9 @@
 # Reproducing the Atera vs Stratamap analysis [post](https://lnkd.in/p/gHZ84RsX)
 
-A self-contained package to reproduce the 8 figures from that [post](https://lnkd.in/p/gHZ84RsX): a spatial-transcriptomics
+A self-contained repository to reproduce the 8 figures from that [post](https://lnkd.in/p/gHZ84RsX): a spatial-transcriptomics
 technology comparison (Atera, VisiumHD, Xenium MM/biomarkers panel, Xenium v1/breast+100 addon
 panel, Xenium 5k, StrataMap - 6 technologies, 8 cell-level samples, all annotated against the same
-10x Chromium Flex scRNA-seq reference). Nothing in this package points at any specific machine, lab,
-or institution: raw data comes from public download links or a documented manual step (see
+10x Chromium Flex scRNA-seq reference). Raw data comes from public download links or a documented manual step (see
 `00_download_raw_data.md`), and every other path is an environment variable you set (see `code/lib.sh`).
 
 **[Read the full analysis report](analysis_report.md)** - narrates all 8 figures in order, with
@@ -85,10 +84,8 @@ workstation can exhaust its memory even though any one of them alone is fine.
 
 ## Notes / scope
 
-- **A few minor bugs were fixed while building this package, relative to the originally posted
-  results** (e.g. a self-referential file glob that duplicated rows on reruns, an inconsistent
-  cell-inclusion threshold across figure 5's panels, a mismatched gene-count label on figure 8).
-  None of them changes any result or conclusion - they just made the analysis more internally
+- **A few minor bugs were fixed relative to the [originally posted results](https://lnkd.in/p/gHZ84RsX)**.
+  None of them changes any conclusion - they just made the analysis more internally
   consistent. See the git history for the specifics.
 - **StrataMap's fresh-frozen vs. everyone-else's FFPE tissue prep is a real confound baked into
   every one of these 8 figures**
