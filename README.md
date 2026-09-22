@@ -1,6 +1,6 @@
-# Reproducing the Atera vs Stratamap analysis posted at https://lnkd.in/p/gHZ84RsX
+# Reproducing the Atera vs Stratamap analysis [post](https://lnkd.in/p/gHZ84RsX)
 
-A self-contained package to reproduce the 8 figures from that post: a spatial-transcriptomics
+A self-contained package to reproduce the 8 figures from that [post](https://lnkd.in/p/gHZ84RsX): a spatial-transcriptomics
 technology comparison (Atera, VisiumHD, Xenium MM/biomarkers panel, Xenium v1/breast+100 addon
 panel, Xenium 5k, StrataMap - 6 technologies, 8 cell-level samples, all annotated against the same
 10x Chromium Flex scRNA-seq reference). Nothing in this package points at any specific machine, lab,
