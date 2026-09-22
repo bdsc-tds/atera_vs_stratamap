@@ -67,6 +67,12 @@ these are largely different samples (see Overview), it also demonstrates
 just how different and heterogeneous the tissue architecture itself is
 from one specimen to the next, independent of any technology effect.
 
+This is also the first figure to use the shared cell-type color
+palette - the same colors mean the same cell type in every figure below
+that’s colored by `first_type` (figures 1-4):
+
+<img src="report_figures/celltype-legend-1.png" style="display: block; margin: auto;" />
+
 **To reproduce:** `02_preprocess.sh` STAGE 0-3 (ingestion, QC, RCTD)
 then STAGE 5 (spatial metadata extraction) for all 8 samples, then:
 
