@@ -195,13 +195,16 @@ for TECH in xenium_5k xenium_biomarkers; do
   MIN_GENES=200; [ "$TECH" = "xenium_biomarkers" ] && MIN_GENES=50
   dispatch "embed_filt_$TECH" 64G 01:00:00 8 \
     "$R_CMD $CODE_R/gene_set_embeddings.R --technology $TECH --sample breast_cancer \
-      --qc-rds $(qc_rds_for $TECH) --gene-sets panel_genes --min-count-in-subset 20 --npcs 15 --label-suffix _filtered \
+      --qc-rds $(qc_rds_for $TECH) --gene-sets panel_genes --min-count-in-subset 10 --npcs 15 --label-suffix _filtered \
       --min-genes $MIN_GENES --rctd-dir $(rctd_dir_for $TECH) --out-dir $(embed_dir_for $TECH)"
 done
 wait_all
 
 # shared_panel_genes_filtered - only for the technologies with a real (non-proxy) shared axis;
 # xenium_5k/xenium_biomarkers reuse their own panel_genes_filtered as this proxy instead.
+# --min-count-in-subset 10 matches the >=10 nCount QC floor already applied to the self/"all" panel
+# (qc_seurat.R's --min-counts default) - the same cell-inclusion threshold everywhere, not a
+# different, stricter one just for the shared-panel-genes axis.
 echo "=== STAGE 4c: shared_panel_genes_filtered embeddings (6 samples) ==="
 for TECH in atera xenium_breast100 visiumhd stratamap_ill_5um_Grade1 stratamap_ill_5um_Grade2 stratamap_ill_5um_Grade3; do
   MEM=64G; [[ $TECH == stratamap_*Grade2 ]] && MEM=110G; [[ $TECH == stratamap_*Grade3 ]] && MEM=220G
@@ -209,7 +212,7 @@ for TECH in atera xenium_breast100 visiumhd stratamap_ill_5um_Grade1 stratamap_i
   SAMPLE=breast_cancer; [[ $TECH == stratamap_* ]] && SAMPLE=${TECH##*_}
   dispatch "embed_shared_$TECH" "$MEM" 02:00:00 8 \
     "$R_CMD $CODE_R/gene_set_embeddings.R --technology $TECH --sample $SAMPLE \
-      --qc-rds $(qc_rds_for $TECH) --gene-sets shared_panel_genes --min-count-in-subset 20 --npcs 15 --label-suffix _filtered \
+      --qc-rds $(qc_rds_for $TECH) --gene-sets shared_panel_genes --min-count-in-subset 10 --npcs 15 --label-suffix _filtered \
       --rctd-dir $(rctd_dir_for $TECH) --out-dir $(embed_dir_for $TECH) $UMAP_INIT"
 done
 wait_all
@@ -307,13 +310,16 @@ echo "=== STAGE 11: sensitivity by gene set ==="
 # needs "all" (self); atera/xenium_breast100/visiumhd/stratamap x3 have a real shared_panel_genes
 # axis; xenium_biomarkers instead needs its own panel_genes (used as its shared-panel proxy);
 # xenium_5k needs neither proxy (dropped from panels 3-5 - see summary_grid_shared_panel.R's header).
+# --min-count-in-subset 10 matches STAGE 4b/4c's embeddings exactly (same >=10 nCount floor as the
+# self/"all" panel's own QC threshold) - so panels 2/3/4/5's shared-panel bars all describe the same
+# cell population, not a filtered one for n_cells/ARI and an unfiltered one for nCount/nCount-per-nGenes.
 declare -A SENS_GENESETS=( [atera]=all,shared_panel_genes [xenium_breast100]=all,shared_panel_genes \
   [visiumhd]=all,shared_panel_genes [xenium_biomarkers]=all,panel_genes [xenium_5k]=all )
 declare -A SENS_MEM=( [atera]=64G [xenium_biomarkers]=64G [xenium_breast100]=64G [xenium_5k]=64G [visiumhd]=64G )
 for TECH in "${TECHS[@]}"; do
   dispatch "sensitivity_$TECH" "${SENS_MEM[$TECH]}" 01:30:00 4 \
     "$R_CMD $CODE_R/sensitivity_by_geneset_celltype.R --technology $TECH --sample breast_cancer \
-      --qc-rds $(qc_rds_for $TECH) --gene-sets ${SENS_GENESETS[$TECH]} \
+      --qc-rds $(qc_rds_for $TECH) --gene-sets ${SENS_GENESETS[$TECH]} --min-count-in-subset 10 \
       --out-dir $REPRO_RESULTS/sensitivity/$TECH"
 done
 declare -A SM_SENS_MEM=( [Grade1]=64G [Grade2]=96G [Grade3]=150G )
@@ -321,7 +327,7 @@ for GRADE in Grade1 Grade2 Grade3; do
   TECH="stratamap_ill_5um_$GRADE"
   dispatch "sensitivity_sm_$GRADE" "${SM_SENS_MEM[$GRADE]}" 02:00:00 4 \
     "$R_CMD $CODE_R/sensitivity_by_geneset_celltype.R --technology $TECH --sample $GRADE \
-      --qc-rds $(qc_rds_for $TECH) --gene-sets all,shared_panel_genes \
+      --qc-rds $(qc_rds_for $TECH) --gene-sets all,shared_panel_genes --min-count-in-subset 10 \
       --out-dir $REPRO_RESULTS/sensitivity/$TECH"
 done
 wait_all

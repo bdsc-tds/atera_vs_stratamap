@@ -159,6 +159,14 @@ shared across every whole-transcriptome technology (“shared panel
 genes”, hatched). This is the core “how much does restricting everyone
 to the same gene axis change what you can resolve” figure.
 
+Every hatched bar - N cells, N counts/cell, N counts/gene/cell, and ARI
+alike - uses the same cell-inclusion rule: cells need \>=10 counts
+within the shared-panel gene subset, the same nCount floor already
+applied to the self/full panel (`qc_seurat.R`’s QC threshold). So all 5
+panels describe the same population of cells for a given technology’s
+shared-panel bar, not a stricter filter for some panels and a looser one
+for others.
+
 Xenium 5k and Xenium MM don’t have a *native* shared-panel-genes
 computation, so their hatched bar is a proxy: their own genes
 intersected with the 380-gene breast+100 addon panel (`panel_genes`).
