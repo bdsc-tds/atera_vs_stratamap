@@ -93,10 +93,23 @@ figure, then renders it: the real PNG if it exists, otherwise a version rebuilt 
 ```{r shared-setup}
 pal <- get_celltype_palette()
 
+# Same overall-abundance order figure 3 sorts its bars by (most to least common cell type, summed
+# across every sample) - falls back to the palette's alphabetical name order if composition_summary.csv
+# hasn't been generated yet, same graceful-degradation pattern show_or_rebuild uses elsewhere.
+celltype_composition_csv <- file.path(REPRO_RESULTS, "composition/composition_summary.csv")
+celltype_order <- if (file.exists(celltype_composition_csv)) {
+  ord <- read.csv(celltype_composition_csv) %>% group_by(first_type) %>%
+    summarise(total_n = sum(n), .groups = "drop") %>% arrange(desc(total_n)) %>% pull(first_type)
+  c(ord, setdiff(names(pal), ord))
+} else {
+  names(pal)
+}
+
 # Figures 1-4 all color by RCTD first_type but hide their own per-panel legend by design (grid
-# assembly, no room for 8 repeated legends) - this draws the shared color key once per figure below.
+# assembly, no room for 8 repeated legends) - this draws the shared color key once per figure below,
+# cell types ordered by overall abundance (most to least common), not alphabetically.
 draw_celltype_legend <- function() {
-  legend_plot <- ggplot(data.frame(cell_type = factor(names(pal), levels = names(pal))),
+  legend_plot <- ggplot(data.frame(cell_type = factor(celltype_order, levels = celltype_order)),
                          aes(x = 1, y = 1, color = cell_type)) +
     geom_point(size = 5) +
     scale_color_manual(values = pal, name = "Cell type", drop = FALSE) +
