@@ -7,11 +7,6 @@
 # Run as: bash 02_preprocess.sh (not sourced). Safe to re-run - every step is idempotent (same
 # output paths) and most scripts just overwrite their outputs.
 #
-# No institution-specific paths anywhere in this script or the code it calls - everything is
-# driven by the environment variables in the CONFIG block below. This does not reimplement any
-# analysis logic: it orchestrates the scripts in code/R and code/python with every path/flag
-# filled in concretely.
-#
 # Prerequisites: an R + Python environment with the packages in environment.yml (conda env create
 # -f environment.yml && conda activate spatial-tech-comparison), plus 2 GitHub-only R packages not
 # on CRAN/Bioconductor (install once):
@@ -167,7 +162,6 @@ wait_all
 echo "=== STAGE 4: gene-set embeddings (self only) ==="
 declare -A EMBED_MEM=( [atera]=64G [xenium_biomarkers]=64G [xenium_breast100]=64G [xenium_5k]=64G [visiumhd]=96G )
 for TECH in "${TECHS[@]}"; do
-  # "informative" (protein_coding+lncRNA) is only used as the "self" gene set for StrataMap
   # (umap_self_grid.R's self_gene_set()) - Atera/VisiumHD's self group uses "all" too, so no
   # technology in this loop needs it.
   dispatch "embed_$TECH" "${EMBED_MEM[$TECH]}" 01:00:00 8 \
@@ -180,7 +174,7 @@ declare -A SM_EMBED_MEM=( [Grade1]=64G [Grade2]=110G [Grade3]=220G )
 for GRADE in Grade1 Grade2 Grade3; do
   TECH="stratamap_ill_5um_$GRADE"
   UMAP_INIT=""; [ "$GRADE" = "Grade3" ] && UMAP_INIT="--umap-init random"  # RSpectra::eigs_sym can segfault on ~700k-cell inputs with the spectral default
-  # StrataMap's "self" UMAP now uses "all" too (not "informative"), matching every other
+  # StrataMap's "self" UMAP uses "all", matching every other
   # technology and the ARI figure's SELF_GENE_SET - see umap_self_grid.R's self_gene_set().
   dispatch "embed_sm_$GRADE" "${SM_EMBED_MEM[$GRADE]}" 02:00:00 8 \
     "$R_CMD $CODE_R/gene_set_embeddings.R --technology $TECH --sample $GRADE \
@@ -244,15 +238,15 @@ for TECH in "${TECHS[@]}"; do
   dispatch "spillover_$TECH" "${SPILL_MEM[$TECH]}" 03:00:00 8 \
     "$R_CMD $CODE_R/spillover.R --technology $TECH \
       --qc-rds $(qc_rds_for $TECH) --rctd-dir $(rctd_dir_for $TECH) \
-      --out-dir $REPRO_RESULTS/spillover/$TECH --cache-dir $REPRO_RESULTS/spillover_cache/$TECH"
+      --cache-dir $REPRO_RESULTS/spillover_cache/$TECH"
 done
 declare -A SM_SPILL_MEM=( [Grade1]=64G [Grade2]=96G [Grade3]=150G )
 for GRADE in Grade1 Grade2 Grade3; do
   # Cache dir naming below (stratamap_ill_5um_<Grade>) matches plot_common.R's tech key exactly.
   dispatch "spillover_sm_$GRADE" "${SM_SPILL_MEM[$GRADE]}" 04:00:00 8 \
-    "$R_CMD $CODE_R/spillover.R --technology stratamap_ill_5um --sample $GRADE \
+    "$R_CMD $CODE_R/spillover.R --technology stratamap_ill_5um_$GRADE \
       --qc-rds $(qc_rds_for stratamap_ill_5um_$GRADE) --rctd-dir $(rctd_dir_for stratamap_ill_5um_$GRADE) \
-      --out-dir $REPRO_RESULTS/spillover/stratamap_ill_5um_$GRADE --cache-dir $REPRO_RESULTS/spillover_cache/stratamap_ill_5um_$GRADE"
+      --cache-dir $REPRO_RESULTS/spillover_cache/stratamap_ill_5um_$GRADE"
 done
 wait_all
 
