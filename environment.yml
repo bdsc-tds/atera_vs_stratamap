@@ -25,8 +25,8 @@ dependencies:
   - r-rhdf5
   - bioconductor-dropletutils
   - r-devtools          # for installing spacexr/SPLIT from GitHub, see README.md
-  - r-rmarkdown         # for knitting 04_analysis_report.Rmd
-  - r-knitr             # for knitting 04_analysis_report.Rmd
+  - r-rmarkdown         # for knitting analysis_report.Rmd
+  - r-knitr             # for knitting analysis_report.Rmd
   - python>=3.10
   - pip
   - pip:
