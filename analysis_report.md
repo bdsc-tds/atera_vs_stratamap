@@ -221,9 +221,17 @@ Rscript code/R/spillover_metrics.R --cache-root results/spillover_cache --out-di
 
 One point per technology: median transcript abundance (i.e., for each
 gene, total gene counts normalized by total number of cells) on the
-technology’s own full panel (y) vs. on the 353-gene shared panel axis
-(x), log-scaled, with a dashed identity line and IQR error bars in both
+technology’s own full panel (y) vs. on the shared-panel axis (x),
+log-scaled, with a dashed identity line and IQR error bars in both
 directions. Point size reflects self panel size.
+
+The shared-panel axis is the same literal 353-gene list for every
+technology, but not every technology’s own panel actually contains all
+353 of those genes: Atera, VisiumHD, Xenium v1, and StrataMap (all 3
+grades) do (353/353); Xenium 5k’s panel only overlaps 229 of them, and
+Xenium MM’s smaller targeted panel only 91. Those two points are still
+the correct, literal intersection with the same 353-gene list - just a
+smaller one, because their panels are smaller.
 
 **To reproduce:** `02_preprocess.sh` STAGE 0-3, STAGE 5 (spatial
 metadata, needed by `gene_sensitivity.R`), and STAGE 12 (per-gene
