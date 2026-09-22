@@ -100,7 +100,9 @@ pal <- get_celltype_palette()
 One spatial plot per sample (all 8, fixed order: StrataMap grades 1-3, VisiumHD, Atera,
 Xenium 5k, Xenium MM, Xenium v1), points colored by RCTD `first_type`. This is the most direct look
 at whether each technology recovers the tissue's spatial organization (e.g. tumor regions,
-stroma) at all, before any quantitative metric.
+stroma) at all, before any quantitative metric - and, since these are largely different samples (see
+Overview), it also demonstrates just how different and heterogeneous the tissue architecture itself
+is from one specimen to the next, independent of any technology effect.
 
 **To reproduce:** `02_preprocess.sh` STAGE 0-3 (ingestion, QC, RCTD) then STAGE 5 (spatial metadata
 extraction) for all 8 samples, then:
