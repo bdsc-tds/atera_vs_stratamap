@@ -67,12 +67,6 @@ these are largely different samples (see Overview), it also demonstrates
 just how different and heterogeneous the tissue architecture itself is
 from one specimen to the next, independent of any technology effect.
 
-This is also the first figure to use the shared cell-type color
-palette - the same colors mean the same cell type in every figure below
-that’s colored by `first_type` (figures 1-4):
-
-<img src="report_figures/celltype-legend-1.png" style="display: block; margin: auto;" />
-
 **To reproduce:** `02_preprocess.sh` STAGE 0-3 (ingestion, QC, RCTD)
 then STAGE 5 (spatial metadata extraction) for all 8 samples, then:
 
@@ -82,6 +76,8 @@ Rscript code/R/spatial_grid.R --out-dir results/figures/spatial --format png --d
 ```
 
 <img src="report_figures/spatial_grid_all_bigdots_asp2.png" width="3600" style="display: block; margin: auto;" />
+
+<img src="report_figures/fig1-legend-1.png" style="display: block; margin: auto;" />
 
 ------------------------------------------------------------------------
 
@@ -103,6 +99,8 @@ Rscript code/R/umap_self_grid.R --out-dir results/figures/umap --out-name umap_s
 
 <img src="report_figures/umap_self_grid_all.png" width="9600" style="display: block; margin: auto;" />
 
+<img src="report_figures/fig2-legend-1.png" style="display: block; margin: auto;" />
+
 ------------------------------------------------------------------------
 
 ## Figure 3: Cell-type composition per sample
@@ -121,6 +119,8 @@ Rscript code/R/composition_grid.R --summary-csv results/composition/composition_
 ```
 
 <img src="report_figures/composition_grid_all_pct_linear_fixedy_tall.png" width="5520" style="display: block; margin: auto;" />
+
+<img src="report_figures/fig3-legend-1.png" style="display: block; margin: auto;" />
 
 ------------------------------------------------------------------------
 
@@ -144,6 +144,8 @@ Rscript code/R/celltype_threshold_sensitivity.R --extract-dir results/count_dist
 ```
 
 <img src="report_figures/celltype_threshold_sensitivity_tall.png" width="4800" style="display: block; margin: auto;" />
+
+<img src="report_figures/fig4-legend-1.png" style="display: block; margin: auto;" />
 
 ------------------------------------------------------------------------
 

@@ -92,6 +92,24 @@ figure, then renders it: the real PNG if it exists, otherwise a version rebuilt 
 
 ```{r shared-setup}
 pal <- get_celltype_palette()
+
+# Figures 1-4 all color by RCTD first_type but hide their own per-panel legend by design (grid
+# assembly, no room for 8 repeated legends) - this draws the shared color key once per figure below.
+draw_celltype_legend <- function() {
+  legend_plot <- ggplot(data.frame(cell_type = factor(names(pal), levels = names(pal))),
+                         aes(x = 1, y = 1, color = cell_type)) +
+    geom_point(size = 5) +
+    scale_color_manual(values = pal, name = "Cell type", drop = FALSE) +
+    guides(color = guide_legend(nrow = 2, override.aes = list(size = 5))) +
+    theme_void() +
+    theme(legend.position = "bottom", legend.title = element_text(size = 12, face = "bold"),
+          legend.text = element_text(size = 11))
+  g <- ggplotGrob(legend_plot)
+  grob_names <- vapply(g$grobs, function(x) x$name, character(1))
+  legend_grob <- g$grobs[[which(grepl("guide-box", grob_names))[1]]]
+  grid::grid.newpage()
+  grid::grid.draw(legend_grob)
+}
 ```
 
 ---
@@ -104,25 +122,6 @@ at whether each technology recovers the tissue's spatial organization (e.g. tumo
 stroma) at all, before any quantitative metric - and, since these are largely different samples (see
 Overview), it also demonstrates just how different and heterogeneous the tissue architecture itself
 is from one specimen to the next, independent of any technology effect.
-
-This is also the first figure to use the shared cell-type color palette - the same colors mean the
-same cell type in every figure below that's colored by `first_type` (figures 1-4):
-
-```{r celltype-legend, fig.width=10, fig.height=1.2, echo=FALSE}
-legend_plot <- ggplot(data.frame(cell_type = factor(names(pal), levels = names(pal))),
-                       aes(x = 1, y = 1, color = cell_type)) +
-  geom_point(size = 5) +
-  scale_color_manual(values = pal, name = "Cell type", drop = FALSE) +
-  guides(color = guide_legend(nrow = 2, override.aes = list(size = 5))) +
-  theme_void() +
-  theme(legend.position = "bottom", legend.title = element_text(size = 12, face = "bold"),
-        legend.text = element_text(size = 11))
-g <- ggplotGrob(legend_plot)
-grob_names <- vapply(g$grobs, function(x) x$name, character(1))
-legend_grob <- g$grobs[[which(grepl("guide-box", grob_names))[1]]]
-grid::grid.newpage()
-grid::grid.draw(legend_grob)
-```
 
 **To reproduce:** `02_preprocess.sh` STAGE 0-3 (ingestion, QC, RCTD) then STAGE 5 (spatial metadata
 extraction) for all 8 samples, then:
@@ -143,6 +142,10 @@ show_or_rebuild(
 )
 ```
 
+```{r fig1-legend, fig.width=10, fig.height=1.2}
+draw_celltype_legend()
+```
+
 ---
 
 ## Figure 2: Per-technology UMAP
@@ -160,6 +163,10 @@ Rscript code/R/umap_self_grid.R --out-dir results/figures/umap --out-name umap_s
 
 ```{r fig2, fig.width=12, fig.height=3}
 show_or_rebuild(file.path(FIG_DIR, "umap/umap_self_grid_all.png"), character(0), NULL)
+```
+
+```{r fig2-legend, fig.width=10, fig.height=1.2}
+draw_celltype_legend()
 ```
 
 ---
@@ -196,6 +203,10 @@ show_or_rebuild(
 )
 ```
 
+```{r fig3-legend, fig.width=10, fig.height=1.2}
+draw_celltype_legend()
+```
+
 ---
 
 ## Figure 4: Cell-type sensitivity to the nCount QC floor
@@ -229,6 +240,10 @@ show_or_rebuild(
       theme_post_bar() + theme(legend.position = "none", strip.background = element_blank())
   }
 )
+```
+
+```{r fig4-legend, fig.width=10, fig.height=1.2}
+draw_celltype_legend()
 ```
 
 ---
